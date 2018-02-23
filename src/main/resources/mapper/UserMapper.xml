@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.phoenix.dataobject.auth.mapper.UserMapper" >
+
+    <select id="selectByUserId" parameterType="java.lang.String" resultType="com.phoenix.dataobject.auth.User">
+        SELECT name, user_name, password, status
+        FROM user
+        WHERE user_id = #{userId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByUserName" parameterType="java.util.Map" resultType="com.phoenix.dataobject.auth.User">
+        SELECT user_id, name, user_name, password, status
+        FROM user
+        WHERE user_name = #{userName, jdbcType=VARCHAR}
+        <if test="password != null">
+            AND password = #{password, jdbcType=VARCHAR}
+        </if>
+    </select>
+
+</mapper>

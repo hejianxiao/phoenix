@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.phoenix.dataobject.auth.mapper.PermissionMapper">
+    <resultMap id="BaseResultMap" type="com.phoenix.dataobject.auth.Permission">
+        <id column="permission_id" jdbcType="VARCHAR" property="permissionId" />
+        <result column="permission_name" jdbcType="VARCHAR" property="permissionName" />
+        <result column="resource_type" jdbcType="TINYINT" property="resourceType" />
+        <result column="url" jdbcType="VARCHAR" property="url" />
+        <result column="permiss" jdbcType="VARCHAR" property="permiss" />
+        <result column="parent_id" jdbcType="VARCHAR" property="parentId" />
+        <result column="sort_rank" jdbcType="INTEGER" property="sortRank" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        permission_id, permission_name, resource_type, url, permiss, parent_id, sort_rank,
+        create_time, update_time
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from permission
+        where permission_id = #{permissionId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByUserId" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT DISTINCT
+          `permission`.*
+        FROM `permission`, `role_permission`, `user_role`, `user`
+        WHERE `user`.user_id= #{userId,jdbcType=VARCHAR}
+        AND `user`.user_id=`user_role`.user_id
+        AND `user_role`.role_id = `role_permission`.role_id
+        AND `role_permission`.permission_id = `permission`.permission_id
+        <if test="parentId != null">
+            AND `permission`.parent_id = #{parentId,jdbcType=VARCHAR}
+        </if>
+        ORDER BY `permission`.sort_rank ASC
+    </select>
+
+    <select id="selectAll" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT
+          <include refid="Base_Column_List" />
+        FROM permission
+        WHERE 1=1
+        <if test="resourceType != null">
+            AND `permission`.resource_type = #{resourceType,jdbcType=INTEGER}
+        </if>
+        <if test="parentId != null">
+            AND `permission`.parent_id = #{parentId,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+
+    <select id="selectPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM permission
+        WHERE parent_id = #{parentId,jdbcType=VARCHAR}
+        <if test="resourceType != null">
+            AND resource_type = #{resourceType,jdbcType=INTEGER}
+        </if>
+        ORDER BY sort_rank ASC
+    </select>
+
+    <select id="selectByRoleId" parameterType="java.util.Map" resultType="map">
+        SELECT
+        p.permission_name AS permissionName,
+        p.create_time AS createTime,
+        p.permission_id AS permissionId,
+        p.parent_id AS pid,
+        CASE WHEN (
+          SELECT COUNT(*) FROM role_permission WHERE
+            role_id = #{roleId,jdbcType=VARCHAR}
+            AND permission_id = p.permission_id
+        ) > 0 THEN '0' ELSE '1' END AS flag
+        FROM `permission` p
+        WHERE p.parent_id = #{parentId,jdbcType=VARCHAR}
+        AND p.resource_type = 0
+        ORDER BY p.sort_rank ASC
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from permission
+        where permission_id = #{permissionId,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.phoenix.dataobject.auth.Permission">
+        insert into permission (permission_id, permission_name, resource_type,
+        url, permiss, parent_id,
+        sort_rank, create_time, update_time
+        )
+        values (#{permissionId,jdbcType=VARCHAR}, #{permissionName,jdbcType=VARCHAR}, #{resourceType,jdbcType=TINYINT},
+        #{url,jdbcType=VARCHAR}, #{permiss,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR},
+        #{sortRank,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="com.phoenix.dataobject.auth.Permission">
+        insert into permission
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="permissionId != null">
+                permission_id,
+            </if>
+            <if test="permissionName != null">
+                permission_name,
+            </if>
+            <if test="resourceType != null">
+                resource_type,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="permiss != null">
+                permiss,
+            </if>
+            <if test="parentId != null">
+                parent_id,
+            </if>
+            <if test="sortRank != null">
+                sort_rank,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="permissionId != null">
+                #{permissionId,jdbcType=VARCHAR},
+            </if>
+            <if test="permissionName != null">
+                #{permissionName,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                #{resourceType,jdbcType=TINYINT},
+            </if>
+            <if test="url != null">
+                #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="permiss != null">
+                #{permiss,jdbcType=VARCHAR},
+            </if>
+            <if test="parentId != null">
+                #{parentId,jdbcType=VARCHAR},
+            </if>
+            <if test="sortRank != null">
+                #{sortRank,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.phoenix.dataobject.auth.Permission">
+        update permission
+        <set>
+            <if test="permissionName != null">
+                permission_name = #{permissionName,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                resource_type = #{resourceType,jdbcType=TINYINT},
+            </if>
+            <if test="url != null">
+                url = #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="permiss != null">
+                permiss = #{permiss,jdbcType=VARCHAR},
+            </if>
+            <if test="parentId != null">
+                parent_id = #{parentId,jdbcType=VARCHAR},
+            </if>
+            <if test="sortRank != null">
+                sort_rank = #{sortRank,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where permission_id = #{permissionId,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.phoenix.dataobject.auth.Permission">
+        update permission
+        set permission_name = #{permissionName,jdbcType=VARCHAR},
+        resource_type = #{resourceType,jdbcType=TINYINT},
+        url = #{url,jdbcType=VARCHAR},
+        permiss = #{permiss,jdbcType=VARCHAR},
+        parent_id = #{parentId,jdbcType=VARCHAR},
+        sort_rank = #{sortRank,jdbcType=INTEGER},
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+        update_time = #{updateTime,jdbcType=TIMESTAMP}
+        where permission_id = #{permissionId,jdbcType=VARCHAR}
+    </update>
+</mapper>

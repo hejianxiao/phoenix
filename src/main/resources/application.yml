@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/phoenix?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: 123456
+
+  freemarker:
+    settings:
+      datetime_format: yyyy-MM-dd HH:mm:ss
+      date_format: yyyy-MM-dd
+      time_format: HH:mm:ss
+      template_update_delay: 0
+      auto_import: common/macro.ftl as m
+      whitespace_stripping: true
+      default_encoding: UTF-8
+      tag_syntax: auto_detect
+      url_escaping_charset: UTF-8
+    suffix: .html
+
+
+mybatis:
+  type-aliases-package: com.phoenix.dataobject
+  mapper-locations: classpath:mapper/*.xml
+  #驼峰命名
+  configuration:
+    mapUnderscoreToCamelCase: true
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params:
+    count=countSql
+
+
+#系统配置
+sysConfig:
+  basePath: http://192.168.100.40:8080
